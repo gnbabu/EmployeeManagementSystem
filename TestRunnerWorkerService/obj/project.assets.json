@@ -1623,11 +1623,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Projects\\EmployeeManagementSystem\\TestRunnerWorkerService\\TestRunnerWorkerService.csproj",
+      "projectUniqueName": "C:\\Users\\Naresh\\Documents\\GitHub\\EmployeeManagementSystem\\TestRunnerWorkerService\\TestRunnerWorkerService.csproj",
       "projectName": "TestRunnerWorkerService",
-      "projectPath": "D:\\Projects\\EmployeeManagementSystem\\TestRunnerWorkerService\\TestRunnerWorkerService.csproj",
+      "projectPath": "C:\\Users\\Naresh\\Documents\\GitHub\\EmployeeManagementSystem\\TestRunnerWorkerService\\TestRunnerWorkerService.csproj",
       "packagesPath": "C:\\Users\\Naresh\\.nuget\\packages\\",
-      "outputPath": "D:\\Projects\\EmployeeManagementSystem\\TestRunnerWorkerService\\obj\\",
+      "outputPath": "C:\\Users\\Naresh\\Documents\\GitHub\\EmployeeManagementSystem\\TestRunnerWorkerService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

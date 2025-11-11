@@ -7,12 +7,15 @@
             columns: [],
             pageSizeOptions: [5, 10, 20, 50, 100],
             initialPageSize: 10,
+            tableClass: 'table table-bordered table-striped', // default Bootstrap 3 styling
             gridTitle: 'Data Grid',
             noDataMessage: 'No data available.',
             idProperty: 'id',
             enableAllColumnSearch: false,
             enableColumnFilters: false,
             enableColumnVisibility: false,
+            dateFormat: 'MM-DD-YYYY',
+            includeTime: false,//  option for formatting dates with time
             enableSorting: false, // overall sorting, defaults to false
             exportOptions: {
                 enable: false,    // Overall enable flag for export
@@ -38,25 +41,45 @@
 
         // Date parsing function
         function parseDate(str) {
-            const [dd, mm, yyyy] = str.split('-');
-            if (!dd || !mm || !yyyy) return null;
-            const date = new Date(`${yyyy}-${mm}-${dd}`);
-            return isNaN(date.getTime()) ? null : date;
+            const date = moment(str, settings.dateFormat, true); // strict mode
+            return date.isValid() ? date.toDate() : null;
         }
 
         function formatValueForSearch(value, col) {
             if (value == null) return '';
+
             if (col.type === 'date') {
-                const date = new Date(value);
-                if (!isNaN(date.getTime())) {
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    return `${day}-${month}-${year}`.toLowerCase();
-                }
+                const date = moment(value);
+                return date.isValid()
+                    ? date.format(settings.dateFormat).toLowerCase()
+                    : '';
             }
             return value.toString().toLowerCase();
-        } function buildColumnVisibilityDropdown() {
+        }
+
+        function formatDateForDisplay(dateVal) {
+            if (!dateVal) return '';
+
+            const m = moment(dateVal, [settings.dateFormat, "YYYY-MM-DD", moment.ISO_8601], true);
+            if (!m.isValid()) return '';
+
+            const formatStr = settings.includeTime
+                ? `${settings.dateFormat} HH:mm:ss`
+                : settings.dateFormat;
+
+            return m.format(formatStr);
+        }
+
+        // Helper to convert Moment-like format to jQuery UI format
+        function convertToJqueryDateFormat(format) {
+            return format
+                .replace(/DD/g, 'dd')
+                .replace(/MM/g, 'mm')
+                .replace(/YYYY/g, 'yy')
+                .replace(/YY/g, 'y');
+        }
+
+        function buildColumnVisibilityDropdown() {
             const $dropdown = $element.find('.column-visibility-dropdown').empty();
             settings.columns.forEach(col => {
                 if (col.type) {
@@ -77,7 +100,8 @@
                 buildTableHeader();
                 renderTable();
             });
-        } function buildTableHeader() {
+        }
+        function buildTableHeader() {
             const $thead = $element.find('#table-head').empty();
             settings.columns.forEach(col => {
                 if (!visibleColumns[col.key]) return;
@@ -87,6 +111,8 @@
                 const sortIcon = sortKey === col.key ? (sortAsc ? ' ▲' : ' ▼') : '';
 
                 const $th = $('<th></th>');
+                if (col.width) $th.css('width', col.width);
+
                 const $label = $(`<strong>${col.title}${sortIcon}</strong>`);
 
                 // Conditionally attach the click event based on column's sortable property and overall enableSorting
@@ -210,38 +236,58 @@
         function applyFilters(data) {
             return data.filter(row => {
                 return Object.entries(filters).every(([key, filter]) => {
+                    const col = settings.columns.find(c => c.key === key);
+                    const colType = col?.type || 'text';
+
                     const rawVal = row[key];
-                    const val = rawVal !== null && rawVal !== undefined ? rawVal.toString().toLowerCase() : '';
+                    const val = rawVal != null ? rawVal.toString().toLowerCase() : '';
                     const value1 = (filter.value1 || '').toLowerCase();
                     const value2 = (filter.value2 || '').toLowerCase();
 
-                    switch (filter.op) {
-                        case 'eq': return val === value1;
-                        case 'neq': return val !== value1;
-                        case 'lt': return val < value1;
-                        case 'gt': return val > value1;
-                        case 'lte': return val <= value1;
-                        case 'gte': return val >= value1;
-                        case 'between': {
-                            if (!filter.value1 || !filter.value2) return false;
-                            const numVal = parseFloat(val);
-                            const numVal1 = parseFloat(filter.value1);
-                            const numVal2 = parseFloat(filter.value2);
-                            if (!isNaN(numVal) && !isNaN(numVal1) && !isNaN(numVal2)) {
-                                return numVal >= numVal1 && numVal <= numVal2;
-                            }
-                            const dateVal = parseDate(val);
-                            const dateVal1 = parseDate(filter.value1);
-                            const dateVal2 = parseDate(filter.value2);
-                            if (dateVal && dateVal1 && dateVal2) {
-                                return dateVal >= dateVal1 && dateVal <= dateVal2;
-                            }
-                            return false;
+                    if (colType === 'number') {
+                        const numVal = parseFloat(val);
+                        const numVal1 = parseFloat(value1);
+                        const numVal2 = parseFloat(value2);
+
+                        switch (filter.op) {
+                            case 'eq': return numVal === numVal1;
+                            case 'neq': return numVal !== numVal1;
+                            case 'lt': return numVal < numVal1;
+                            case 'gt': return numVal > numVal1;
+                            case 'lte': return numVal <= numVal1;
+                            case 'gte': return numVal >= numVal1;
+                            case 'between': return !isNaN(numVal) && !isNaN(numVal1) && !isNaN(numVal2) && numVal >= numVal1 && numVal <= numVal2;
+                            default: return true;
                         }
-                        case 'contains': return val.includes(value1);
-                        case 'startsWith': return val.startsWith(value1);
-                        case 'endsWith': return val.endsWith(value1);
-                        default: return true;
+
+                    } else if (colType === 'date') {
+                        const dateVal = moment(rawVal, [settings.dateFormat, "YYYY-MM-DD", moment.ISO_8601], true);
+                        const dateVal1 = moment(filter.value1, [settings.dateFormat, "YYYY-MM-DD", moment.ISO_8601], true);
+                        const dateVal2 = moment(filter.value2, [settings.dateFormat, "YYYY-MM-DD", moment.ISO_8601], true);
+
+                        if (!dateVal.isValid()) return false;
+
+                        switch (filter.op) {
+                            case 'eq': return dateVal.isSame(dateVal1, 'day');
+                            case 'neq': return !dateVal.isSame(dateVal1, 'day');
+                            case 'lt': return dateVal.isBefore(dateVal1, 'day');
+                            case 'gt': return dateVal.isAfter(dateVal1, 'day');
+                            case 'lte': return dateVal.isSameOrBefore(dateVal1, 'day');
+                            case 'gte': return dateVal.isSameOrAfter(dateVal1, 'day');
+                            case 'between': return dateVal1.isValid() && dateVal2.isValid() && dateVal.isBetween(dateVal1, dateVal2, 'day', '[]');
+                            default: return true;
+                        }
+
+                    } else {
+                        // text/string comparisons
+                        switch (filter.op) {
+                            case 'eq': return val === value1;
+                            case 'neq': return val !== value1;
+                            case 'contains': return val.includes(value1);
+                            case 'startsWith': return val.startsWith(value1);
+                            case 'endsWith': return val.endsWith(value1);
+                            default: return true;
+                        }
                     }
                 });
             });
@@ -290,27 +336,19 @@
                         if (value === null || value === undefined || value === '') {
                             value = '';
                         }
-
-                        // If cellTemplate is provided, render it, otherwise default to value
-                        if (col.cellTemplate !== null || col.cellTemplate !== undefined || col.cellTemplate !== '') {
+                        if (col.cellTemplate !== null && col.cellTemplate !== undefined && col.cellTemplate !== '') {
                             if (typeof col.cellTemplate === 'function') {
-                                value = col.cellTemplate(row); // Call the function with the row object
+                                value = col.cellTemplate(row);
                             } else if (typeof col.cellTemplate === 'string') {
-                                // Use template string logic to replace placeholders
-                                value = col.cellTemplate.replace(/{([^}]+)}/g, (match, p1) => row[p1] || ''); // Replace with row values
+                                value = col.cellTemplate.replace(/{([^}]+)}/g, (match, p1) => row[p1] || '');
                             }
                         }
-
-                        if (col.type === 'date' && value) {
-                            const date = new Date(value);
-                            if (!isNaN(date.getTime())) {
-                                const day = String(date.getDate()).padStart(2, '0');
-                                const month = String(date.getMonth() + 1).padStart(2, '0');
-                                const year = date.getFullYear();
-                                value = `${day}-${month}-${year}`;
-                            }
+                        else if (col.type === 'date' && value) {
+                            // If date, format for display
+                            value = formatDateForDisplay(value);
                         }
-                        $tr.append(`<td>${value}</td>`);
+                        const widthAttr = col.width ? ` style="width: ${col.width};"` : '';
+                        $tr.append(`<td${widthAttr}>${value}</td>`);
                     });
                     $tbody.append($tr);
                 });
@@ -339,8 +377,7 @@
             }
         }
 
-        function fetchDataFromApi() {
-            debugger;
+        function fetchDataFromApi() {            
             if (settings.apiUrl) {
                 $.ajax({
                     url: settings.apiUrl,
@@ -373,63 +410,96 @@
         function initialize() {
             $element.html(`
                 <h3>${settings.gridTitle}</h3>
+
                 <div class="row" style="margin-bottom: 10px;">
-                    <div class="col-sm-6 text-left">
-                        <label class="control-label" style="margin-top: 5px;"> Rows per page: </label>
-                        <select id="page-size-dropdown" class="form-control input-sm" style="width: auto; display: inline-block; margin-left: 10px;">
-                        </select>
-                        ${settings.enableColumnFilters ? `<button id="reset-all-filters" class="btn btn-danger">Reset All Filters</button>` : ''}
-                        ${settings.enableColumnVisibility ? `
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Columns <span class="caret"></span> </button>
-                            <ul class="dropdown-menu column-visibility-dropdown" style="padding: 10px;"></ul>
-                         </div>
-                        ` : ''}
-                          ${settings.exportOptions.enable ? `
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Export <span class="caret"></span> </button>
-                            <ul class="dropdown-menu" style="padding: 10px;">
-                                ${settings.exportOptions.copy ? `
-                                <li style="margin-bottom: 5px;">
-                                    <button class="btn btn-sm btn-primary" id="copy-btn" style="width: 100%;">Copy</button>
-                                </li>` : ''}
-                                ${settings.exportOptions.excel ? `
-                                <li style="margin-bottom: 5px;">
-                                    <button class="btn btn-sm btn-success" id="excel-btn" style="width: 100%;">Excel</button>
-                                </li>` : ''}
-                                ${settings.exportOptions.pdf ? `
-                                <li>
-                                    <button class="btn btn-sm btn-danger" id="pdf-btn" style="width: 100%;">PDF</button>
-                                </li>` : ''}
-                            </ul>
-                        </div>` : ''}
+                    <!-- Left Side Controls -->
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-inline">
+                            <!-- Rows per page -->
+                            <div class="form-group" style="margin-bottom: 10px; margin-right: 10px;">
+                                <label class="control-label">Rows per page:</label>
+                                <select id="page-size-dropdown" class="form-control input-sm" style="margin-left: 5px;"></select>
+                            </div>
+
+                            <!-- Reset Filters -->
+                            ${settings.enableColumnFilters ? `
+                            <div class="form-group" style="margin-bottom: 10px; margin-right: 10px;">
+                                <button id="reset-all-filters" class="btn btn-danger btn-sm">Reset All Filters</button>
+                            </div>` : ''}
+
+                            <!-- Column Visibility -->
+                            ${settings.enableColumnVisibility ? `
+                            <div class="form-group" style="margin-bottom: 10px; margin-right: 10px;">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                                        Columns <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu column-visibility-dropdown" style="padding: 10px;"></ul>
+                                </div>
+                            </div>` : ''}
+
+                            <!-- Export Options -->
+                            ${settings.exportOptions.enable ? `
+                            <div class="form-group" style="margin-bottom: 10px;">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                                        Export <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" style="padding: 10px;">
+                                        ${settings.exportOptions.copy ? `
+                                        <li style="margin-bottom: 5px;">
+                                            <button class="btn btn-sm btn-primary" id="copy-btn" style="width: 100%;">Copy</button>
+                                        </li>` : ''}
+                                        ${settings.exportOptions.excel ? `
+                                        <li style="margin-bottom: 5px;">
+                                            <button class="btn btn-sm btn-success" id="excel-btn" style="width: 100%;">Excel</button>
+                                        </li>` : ''}
+                                        ${settings.exportOptions.pdf ? `
+                                        <li>
+                                            <button class="btn btn-sm btn-danger" id="pdf-btn" style="width: 100%;">PDF</button>
+                                        </li>` : ''}
+                                    </ul>
+                                </div>
+                            </div>` : ''}
+                        </div>
                     </div>
 
-                     ${settings.enableAllColumnSearch ? `
-                        <div class="col-sm-6 text-right">
-                            <label>Search: </label>
-                            <input type="text" id="common-search" class="form-control input-sm" style="width: 300px; max-width: 100%; display: inline-block; margin-left: 10px;" placeholder="Search all columns...">
-                        </div>
-                        ` : ''}
+                    <!-- Right Side Search Input -->
+                    ${settings.enableAllColumnSearch ? `
+                    <div class="col-xs-12 col-md-6 text-right">
+                        <div class="form-inline">
+                            <!-- Desktop label -->
+                            <label for="common-search" class="control-label hidden-xs" style="margin-right: 10px;">Search:</label>
 
+                            <!-- Mobile label -->
+                            <label for="common-search" class="control-label visible-xs-block" style="text-align: left;">Search:</label>
+
+                            <input type="text" id="common-search" class="form-control input-sm"
+                                   placeholder="Search all columns..."
+                                   style="width: 100%; max-width: 300px;">
+                        </div>
+                    </div>` : ''}
                 </div>
-                <div>
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr id="table-head"></tr>
-                        </thead>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                     <table class="${settings.tableClass}">
+                        <thead><tr id="table-head"></tr></thead>
                         <tbody id="table-body"></tbody>
                     </table>
                 </div>
+
+                <!-- Pagination + Info -->
                 <div class="row" style="margin-top: 10px;">
-                    <div class="col-sm-6">
+                    <div class="col-xs-12 col-sm-6">
                         <div id="page-info" class="text-muted small" style="padding-top: 6px;"></div>
                     </div>
-                    <div class="col-sm-6 text-right">
-                        <ul class="pagination pagination-sm" id="pagination" style="margin: 0; display: inline-block;"></ul>
+                    <div class="col-xs-12 col-sm-6 text-right">
+                        <ul class="pagination pagination-sm" id="pagination" style="margin: 0;"></ul>
                     </div>
                 </div>
             `);
+
 
             let $pageSizeDropdown = $element.find('#page-size-dropdown');
             settings.pageSizeOptions.forEach(size => {
