@@ -8,8 +8,6 @@
             pageSizeOptions: [5, 10, 20, 50, 100],
             initialPageSize: 10,
             tableClass: 'table table-bordered table-striped',
-            theadClass: '',   // ✅ NEW
-            rowClass: '',     // ✅ NEW
             gridTitle: 'Data Grid',
             noDataMessage: 'No data available.',
             idProperty: 'id',
@@ -360,7 +358,7 @@
                 $tbody.append(`<tr><td colspan="${colspan}" class="text-center">${settings.noDataMessage}</td></tr>`);
             } else {
                 paged.forEach(row => {
-                    const $tr = $('<tr class="dg-data-row">');
+                    const $tr = $('<tr>');
                     settings.columns.forEach(col => {
                         if (!visibleColumns[col.key]) return;
 
@@ -480,8 +478,8 @@
                     ` : ''}
                 </div>
                 <div>
-                    <table class="${settings.tableClass}">
-                        <thead>
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead class="table-light">
                             <tr id="table-head"></tr>
                         </thead>
                         <tbody id="table-body"></tbody>

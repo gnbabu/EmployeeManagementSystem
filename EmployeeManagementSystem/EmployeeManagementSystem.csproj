@@ -122,6 +122,7 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="Correspondence.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="DellDashboard.aspx" />
     <Content Include="Employee.aspx" />
@@ -171,6 +172,7 @@
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
+    <Content Include="Scripts\correspondence.js" />
     <Content Include="Scripts\DataGrid.js" />
     <Content Include="Scripts\DataGridB3\DataGridB3Latest.js" />
     <Content Include="Scripts\DataGridB3\EmployeeGridBinding.js" />
@@ -251,6 +253,13 @@
     </Compile>
     <Compile Include="Contact.aspx.designer.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Correspondence.aspx.cs">
+      <DependentUpon>Correspondence.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Correspondence.aspx.designer.cs">
+      <DependentUpon>Correspondence.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
