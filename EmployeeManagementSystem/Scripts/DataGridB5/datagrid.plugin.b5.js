@@ -398,17 +398,79 @@
         }
 
         function renderPagination(totalPages) {
-            const $pagination = $element.find('#pagination').empty();
+            const $pagination = $element.find('#pagination');
+
+            // If pagination already exists, just update state
+            if ($pagination.children().length) {
+                updatePaginationState(totalPages);
+                return;
+            }
+
+            // Build pagination ONCE
+            let html = `
+        <li class="page-item page-prev">
+            <a class="page-link" href="#">Previous</a>
+        </li>`;
+
             for (let i = 1; i <= totalPages; i++) {
-                const $li = $(`<li class="page-item ${i === page ? 'active' : ''}"><a class="page-link" href="#">${i}</a></li>`);
-                $li.click(function (e) {
-                    e.preventDefault();
-                    page = i;
+                html += `
+            <li class="page-item page-num" data-page="${i}">
+                <a class="page-link" href="#">${i}</a>
+            </li>`;
+            }
+
+            html += `
+        <li class="page-item page-next">
+            <a class="page-link" href="#">Next</a>
+        </li>`;
+
+            $pagination.html(html);
+
+            // Event delegation (bind ONCE)
+            $pagination.off('click').on('click', '.page-num', function (e) {
+                e.preventDefault();
+                page = parseInt($(this).data('page'));
+                renderTable();
+            });
+
+            $pagination.on('click', '.page-prev', function (e) {
+                e.preventDefault();
+                if (page > 1) {
+                    page--;
                     renderTable();
-                });
-                $pagination.append($li);
+                }
+            });
+
+            $pagination.on('click', '.page-next', function (e) {
+                e.preventDefault();
+                if (page < totalPages) {
+                    page++;
+                    renderTable();
+                }
+            });
+
+            updatePaginationState(totalPages);
+        }
+
+        function updatePaginationState(totalPages) {
+            const $pagination = $element.find('#pagination');
+
+            $pagination.find('.page-item').removeClass('active disabled');
+
+            // Active page
+            $pagination.find(`.page-num[data-page="${page}"]`).addClass('active');
+
+            // Disable Previous
+            if (page === 1) {
+                $pagination.find('.page-prev').addClass('disabled');
+            }
+
+            // Disable Next
+            if (page === totalPages) {
+                $pagination.find('.page-next').addClass('disabled');
             }
         }
+
 
         function fetchDataFromApi() {
             if (settings.apiUrl) {

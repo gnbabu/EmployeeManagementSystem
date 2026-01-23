@@ -70,6 +70,7 @@
             border-radius: 6px;
         }
 
+
         /* Datepicker with icon */
         .date-wrapper {
             position: relative;
@@ -133,7 +134,7 @@
                 margin-bottom: 10px;
             }
 
-         .section-title {
+        .section-title {
             background: #f3f3f6;
             padding: 8px 12px;
             font-weight: 600;
@@ -201,7 +202,6 @@
 
             table.correspondence-table thead .filter-input {
                 font-size: 12px;
-                height: 28px;
                 padding: 2px 6px;
                 border-radius: 4px;
                 border: 1px solid #ccc;
@@ -252,17 +252,20 @@
             }
 
         /* ================= PAGINATION (VISUAL MATCH) ================= */
-
-        .pagination .page-item.active .page-link {
-            background-color: #6e42a3;
-            border-color: #6e42a3;
-            color: #fff;
+        .pagination {
+            min-height: 32px;
         }
 
-        .pagination .page-link {
-            color: #6e42a3;
-            font-size: 12px;
-        }
+            .pagination .page-item.active .page-link {
+                background-color: #6e42a3;
+                border-color: #6e42a3;
+                color: #fff;
+            }
+
+            .pagination .page-link {
+                color: #6e42a3;
+                font-size: 12px;
+            }
     </style>
 </head>
 
@@ -488,7 +491,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Include jsPDF and AutoTable -->
-   
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
 
