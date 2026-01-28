@@ -218,3 +218,122 @@
     </Columns>
 </asp:GridView>
 </div>
+
+
+______________
+
+/* Close button icon */
+#btnCancel::before {
+    content: "\F62A"; /* bootstrap icon: x-circle */
+    font-family: "Bootstrap-icons";
+    font-size: 16px;
+}
+
+/* Print button icon */
+#btnPrint::before {
+    content: "\F4C8"; /* bootstrap icon: printer */
+    font-family: "Bootstrap-icons";
+    font-size: 16px;
+}
+
+
+/* Align icon + text */
+#btnCancel::before,
+#btnPrint::before {
+    margin-right: 6px;
+}
+
+.btn-indigo {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: #fff;
+}
+
+<div class="btnBox">
+    <!-- Close -->
+    <asp:Button ID="btnCancel" runat="server"
+        Text=" Close"
+        CausesValidation="false"
+        CssClass="btn btn-light border d-flex align-items-center gap-2"
+        OnClick="btnCancel_Click" />
+
+    <!-- Print -->
+    <asp:Button ID="btnPrint" runat="server"
+        Text=" Print"
+        CssClass="btn btn-primary d-flex align-items-center gap-2"
+        OnClientClick="javascript:printPartOfPage('divPreview');" />
+</div>
+
+__________________
+
+Replace with link buttons
+
+/* Purple (image-like) primary button */
+.btn-indigo {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: #fff;
+}
+
+.btn-indigo:hover,
+.btn-indigo:focus {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+    color: #fff;
+}
+
+.btn-indigo:active {
+    background-color: #4c288f;
+    border-color: #4c288f;
+}
+
+/* Footer container */
+.btnBox {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px 20px;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.popHeader .btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+
+<asp:Panel ID="pnlHeader" CssClass="popHeader" runat="server">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="popTitle">Provider Communication</div>
+
+        <asp:LinkButton ID="lnkHeaderClose" runat="server"
+            CssClass="btn btn-sm btn-light border d-flex align-items-center justify-content-center"
+            OnClick="btnCancel_Click">
+            <i class="bi bi-x-lg"></i>
+        </asp:LinkButton>
+    </div>
+</asp:Panel>
+
+<div class="btnBox">
+
+    <!-- Close button -->
+    <asp:LinkButton ID="lnkClose" runat="server"
+        CssClass="btn btn-light border d-flex align-items-center gap-2"
+        CausesValidation="false"
+        OnClick="btnCancel_Click">
+        <i class="bi bi-x-circle"></i>
+        Close
+    </asp:LinkButton>
+
+    <!-- Purple Print button -->
+    <asp:LinkButton ID="lnkPrint" runat="server"
+        CssClass="btn btn-indigo d-flex align-items-center gap-2"
+        OnClientClick="printPartOfPage('divPreview'); return false;">
+        <i class="bi bi-printer"></i>
+        Print
+    </asp:LinkButton>
+
+</div>
+
