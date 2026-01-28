@@ -1,0 +1,220 @@
+/* ===== GRID HEADER LAYOUT ===== */
+.table thead th {
+    vertical-align: top;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Header text + sort icons */
+.gv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+/* Sort icons */
+.sort-icons {
+    display: inline-flex;
+    flex-direction: column;
+    font-size: 10px;
+    color: #adb5bd;
+}
+
+.sort-icons i {
+    line-height: 8px;
+    cursor: pointer;
+}
+
+/* Filter row */
+.gv-filter {
+    margin-top: 6px;
+}
+
+/* Search box with icon */
+.search-wrapper {
+    position: relative;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.header-search {
+    padding-left: 26px;
+}
+
+/* Remove sorting on first/last columns if needed */
+.table th:first-child,
+.table th:last-child {
+    pointer-events: none;
+}
+
+/* Bootstrap table tweaks */
+.table {
+    margin-bottom: 0;
+}
+
+.table a {
+    text-decoration: none;
+}
+
+
+<div class="table-responsive">
+<asp:GridView
+    ID="gvCorrespondencesearch"
+    runat="server"
+    CssClass="table align-middle table-borderless table-striped"
+    AutoGenerateColumns="false"
+    AllowPaging="true"
+    AllowSorting="true"
+    PageSize="10"
+    EmptyDataText="No correspondence found."
+    ShowHeaderWhenEmpty="true"
+    OnSorting="gvCorrespondencesearch_Sorting"
+    OnPageIndexChanging="gvCorrespondence_PageIndexChanging"
+    OnRowDataBound="gvCorrespondencesearch_RowDataBound">
+
+    <Columns>
+
+        <!-- SUBJECT -->
+        <asp:TemplateField SortExpression="SUBJECT">
+            <HeaderTemplate>
+                <div class="gv-header">
+                    <asp:LinkButton ID="lnkSort_SUBJECT" runat="server"
+                        CommandName="Sort"
+                        CommandArgument="SUBJECT"
+                        Text="Correspondence Subject"
+                        CssClass="text-dark" />
+                    <span class="sort-icons">
+                        <i runat="server" id="iconUp_SUBJECT" class="bi bi-caret-up-fill"></i>
+                        <i runat="server" id="iconDown_SUBJECT" class="bi bi-caret-down-fill"></i>
+                    </span>
+                </div>
+
+                <div class="gv-filter">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <asp:TextBox ID="txtSearchSubject" runat="server"
+                            CssClass="form-control form-control-sm header-search"
+                            AutoPostBack="true"
+                            OnTextChanged="ColumnSearch_TextChanged"
+                            placeholder="Search" />
+                    </div>
+                </div>
+            </HeaderTemplate>
+
+            <ItemTemplate>
+                <asp:LinkButton ID="lnkOpen"
+                    runat="server"
+                    Text='<%# Eval("SUBJECT") %>'
+                    CommandName="OpenEnrollment"
+                    CommandArgument='<%# Container.DataItemIndex %>' />
+            </ItemTemplate>
+        </asp:TemplateField>
+
+        <!-- CORRESPONDENCE TYPE -->
+        <asp:TemplateField SortExpression="CORRESPODENCE_TYPE">
+            <HeaderTemplate>
+                <div class="gv-header">
+                    <asp:LinkButton ID="lnkSort_TYPE" runat="server"
+                        CommandName="Sort"
+                        CommandArgument="CORRESPODENCE_TYPE"
+                        Text="Correspondence Type"
+                        CssClass="text-dark" />
+                    <span class="sort-icons">
+                        <i runat="server" id="iconUp_TYPE" class="bi bi-caret-up-fill"></i>
+                        <i runat="server" id="iconDown_TYPE" class="bi bi-caret-down-fill"></i>
+                    </span>
+                </div>
+
+                <div class="gv-filter">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <asp:TextBox ID="txtSearchType" runat="server"
+                            CssClass="form-control form-control-sm header-search"
+                            AutoPostBack="true"
+                            OnTextChanged="ColumnSearch_TextChanged"
+                            placeholder="Search" />
+                    </div>
+                </div>
+            </HeaderTemplate>
+
+            <ItemTemplate>
+                <%# Eval("CORRESPODENCE_TYPE") %>
+            </ItemTemplate>
+        </asp:TemplateField>
+
+        <!-- PA NUMBER -->
+        <asp:TemplateField SortExpression="PA_NUMBER">
+            <HeaderTemplate>
+                <div class="gv-header">
+                    <asp:LinkButton ID="lnkSort_PA" runat="server"
+                        CommandName="Sort"
+                        CommandArgument="PA_NUMBER"
+                        Text="Prior Authorization Number"
+                        CssClass="text-dark" />
+                    <span class="sort-icons">
+                        <i runat="server" id="iconUp_PA" class="bi bi-caret-up-fill"></i>
+                        <i runat="server" id="iconDown_PA" class="bi bi-caret-down-fill"></i>
+                    </span>
+                </div>
+
+                <div class="gv-filter">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <asp:TextBox ID="txtSearchPA" runat="server"
+                            CssClass="form-control form-control-sm header-search"
+                            AutoPostBack="true"
+                            OnTextChanged="ColumnSearch_TextChanged"
+                            placeholder="Search" />
+                    </div>
+                </div>
+            </HeaderTemplate>
+
+            <ItemTemplate>
+                <%# Eval("PA_NUMBER") %>
+            </ItemTemplate>
+        </asp:TemplateField>
+
+        <!-- DATE SENT -->
+        <asp:TemplateField SortExpression="DATE_SENT">
+            <HeaderTemplate>
+                <div class="gv-header">
+                    <asp:LinkButton ID="lnkSort_DATE_SENT" runat="server"
+                        CommandName="Sort"
+                        CommandArgument="DATE_SENT"
+                        Text="Date Sent"
+                        CssClass="text-dark" />
+                    <span class="sort-icons">
+                        <i runat="server" id="iconUp_DATE_SENT" class="bi bi-caret-up-fill"></i>
+                        <i runat="server" id="iconDown_DATE_SENT" class="bi bi-caret-down-fill"></i>
+                    </span>
+                </div>
+
+                <div class="gv-filter">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <asp:TextBox ID="txtSearchDateSent" runat="server"
+                            CssClass="form-control form-control-sm header-search"
+                            AutoPostBack="true"
+                            OnTextChanged="ColumnSearch_TextChanged"
+                            placeholder="MM/DD/YYYY" />
+                    </div>
+                </div>
+            </HeaderTemplate>
+
+            <ItemTemplate>
+                <%# Eval("DATE_SENT", "{0:MM/dd/yyyy}") %>
+            </ItemTemplate>
+        </asp:TemplateField>
+
+    </Columns>
+</asp:GridView>
+</div>
